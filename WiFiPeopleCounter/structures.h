@@ -1,5 +1,3 @@
-// This-->tab == "structures.h"
-
 #define ETH_MAC_LEN 6
 
 #define SIGNAL_THRESHOLD -70
@@ -9,7 +7,7 @@ uint8_t broadcast2[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 uint8_t broadcast3[3] = { 0x33, 0x33, 0x00 };
 
 //If you want to detect a specific MAC Addess, put it here.
-uint8_t desired[6] = { 0x48, 0x2c, 0xa0, 0x69, 0x30, 0x6f };
+//uint8_t desired[6] = { 0x48, 0x2c, 0xa0, 0x69, 0x30, 0x6f };
 
 bool sniffing = true;
 

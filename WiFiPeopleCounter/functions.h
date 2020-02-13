@@ -1,6 +1,5 @@
-// This-->tab == "functions.h"
-
 // Expose Espressif SDK functionality
+
 extern "C" {
 #include "user_interface.h"
   typedef void (*freedom_outside_cb_t)(uint8 status);
@@ -18,6 +17,7 @@ extern "C" {
 int aps_known_count = 0;                                  // Number of known APs
 int nothing_new = 0;
 int clients_known_count = 0;                              // Number of known CLIENTs
+int foundMAC;
 
 void promisc_cb(uint8_t *buf, uint16_t len)
 {
@@ -54,45 +54,43 @@ void promisc_cb(uint8_t *buf, uint16_t len)
     // convert *buf (only MAC) to string
 
     sprintf(currentMAC,"%02x%02x%02x%02x%02x",buf[22],buf[23],buf[24],buf[25],buf[26]);
-    int foundMAC = 0;
     //Serial.print("Current MAC:");
     //Serial.println(currentMAC);
     for (int i=0;i<MAXlist;i++) {
-      if (currentMAC[0] == lastMACs[i][0] && currentMAC[1] == lastMACs[i][1] && currentMAC[2] == lastMACs[i][2] && currentMAC[3] == lastMACs[i][3] && currentMAC[4] == lastMACs[i][4] &&
-          currentMAC[5] == lastMACs[i][5] && currentMAC[6] == lastMACs[i][6] && currentMAC[7] == lastMACs[i][7] && currentMAC[8] == lastMACs[i][8] && currentMAC[9] == lastMACs[i][9]) 
-        {
-        foundMAC = 1;
-        Serial.print("FOUND RECORDED MAC AT ");
-        Serial.println(i);
-        break;
+      foundMAC = 1;
+      for (int bytepos=0;bytepos<10;bytepos++) {
+        if (currentMAC[bytepos] != lastMACs[i][bytepos]) {
+          foundMAC = 0;
+        }       
+      }
+      if (foundMAC == 1) {
+          //Serial.print("FOUND RECORDED MAC AT ");
+          //Serial.println(i);
+          break;  
       }
     }
     if (!foundMAC && int8_t(buf[0])>SIGNAL_THRESHOLD) {
       strncpy(lastMACs[MACindex],currentMAC,10);
-      Serial.println("NEW MAC WITH GOOD SIGNAL DETECTED!");
+      Serial.print("NEW MAC WITH GOOD SIGNAL DETECTED: ");
+      Serial.println(currentMAC);
       MACindex++;
     }
     if (MACindex == MAXlist) {
+      Serial.println("BUFFER FULL: READY TO START SENDING MACs INFORMATION TO MQTT SERVER");
       for (int i=0;i<MAXlist;i++) {
         for (int i2=0;i2<10;i2++) {
           Serial.print(lastMACs[i][i2]);
         }
         Serial.println();
       }
-      Serial.println("----------------");
       MACindex = 0;
-      // sending data
+      // stop sniffing and start sending data (change WiFi configuration)
       sniffing = false;
     }  
-   /*for(int i=0;i<5;i++) {
-      Serial.printf("%02x:",buf[22+i]);
-    }
-    //Serial.printf("%02x  ",buf[22+5]);
-    // Signal strength is in byte 0
-    //Serial.printf("%i\n",int8_t(buf[0]));
-    */
+   
     // Enable this lines if you want to scan for a specific MAC address
     // Specify desired MAC address on line 10 of structures.h
+    /*
     int same = 1;
     for(int i=0;i<6;i++)
     {
@@ -104,17 +102,13 @@ void promisc_cb(uint8_t *buf, uint16_t len)
     }
     if(same)
     {
-      //Serial.println("Trobat!");
+      Serial.println("MAC found!");
     }
     //different device
     else
     {
-      //Serial.println(currentMAC);
+      Serial.println(currentMAC);
     }
-  }
-  //Different packet type numbers
-  else
-  {
-
+   */
   }
 }
