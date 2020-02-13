@@ -5,7 +5,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "./functions.h"
-#include "./credentials.h"
+#include "./credentials.h" // You must rename the credentials_template.h file to credentials.h and add the requested information
 
 #define disable 0
 #define enable  1
