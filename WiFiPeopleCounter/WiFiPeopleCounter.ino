@@ -14,7 +14,7 @@ unsigned int channel = 1;
 unsigned long lastupload;
 unsigned long timer;
 
-char sendMAC[11];
+char sendMAC[13];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -24,7 +24,7 @@ void setup() {
   Serial.println(F("MAC Sniffer and MQTT client logger by FerriTheMaker https://github.com/ferrithemaker/esp8266-wifi-people-counter"));
   Serial.println(F("Based on ESP8266 enhanced sniffer by Kosme https://github.com/kosme"));
   for (int i=0;i<MAXlist;i++) {
-    for (int i2=0;i2<10;i2++) {
+    for (int i2=0;i2<12;i2++) {
       lastMACs[i][i2]=0x00; // clean the array (fill with 0's)
     }
   }
@@ -103,13 +103,13 @@ void sendMQTTdata() {
     // sending buffer information to MQTT server
     for (int i=0;i<MAXlist;i++) {
             int noempty = 0;
-            for (int i2=0;i2<10;i2++) {
+            for (int i2=0;i2<12;i2++) {
               sendMAC[i2]=lastMACs[i][i2];
               if (lastMACs[i][i2]!=0x00) {
                 noempty=1;
               }
             }
-            sendMAC[10]='\0';
+            sendMAC[12]='\0';
             if (noempty == 1) {
               client.publish("esp/sniffer", sendMAC);
               Serial.print("SENDING MAC TO MQTT SERVER: ");
@@ -117,12 +117,7 @@ void sendMQTTdata() {
               delay(200);
             }
             
-            //char strMAC[11]= {lastMACs[i][0],lastMACs[i][1],lastMACs[i][2],lastMACs[i][3],lastMACs[i][4],lastMACs[i][5],lastMACs[i][6],lastMACs[i][7],lastMACs[i][8],lastMACs[i][9],'\0'};
-            //if (strMAC!="0000000000") { // if MAC is all 0's skip
-            //  client.publish("esp/sniffer", strMAC);
-            //  delay(200);
-            //}
-            for (int i2=0;i2<10;i2++) lastMACs[i][i2]=0x00; // clean the array (fill with 0's)
+            for (int i2=0;i2<12;i2++) lastMACs[i][i2]=0x00; // clean the array (fill with 0's)
     }
     MACindex = 0;
     // reenable sniffing

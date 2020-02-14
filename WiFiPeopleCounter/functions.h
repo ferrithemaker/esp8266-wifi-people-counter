@@ -33,7 +33,7 @@ void promisc_cb(uint8_t *buf, uint16_t len)
     struct sniffer_buf *sniffer = (struct sniffer_buf*) buf;
     potencia = sniffer->rx_ctrl.rssi;
   }
-  char currentMAC[10];
+  char currentMAC[12];
   
   // Position 12 in the array is where the packet type number is located
   // For info on the different packet type numbers check:
@@ -53,12 +53,12 @@ void promisc_cb(uint8_t *buf, uint16_t len)
 
     // convert *buf (only MAC) to string
 
-    sprintf(currentMAC,"%02x%02x%02x%02x%02x",buf[22],buf[23],buf[24],buf[25],buf[26]);
+    sprintf(currentMAC,"%02x%02x%02x%02x%02x%02x",buf[22],buf[23],buf[24],buf[25],buf[26],buf[27]);
     //Serial.print("Current MAC:");
     //Serial.println(currentMAC);
     for (int i=0;i<MAXlist;i++) {
       foundMAC = 1;
-      for (int bytepos=0;bytepos<10;bytepos++) {
+      for (int bytepos=0;bytepos<12;bytepos++) {
         if (currentMAC[bytepos] != lastMACs[i][bytepos]) {
           foundMAC = 0;
         }       
@@ -70,7 +70,7 @@ void promisc_cb(uint8_t *buf, uint16_t len)
       }
     }
     if (!foundMAC && int8_t(buf[0])>SIGNAL_THRESHOLD) {
-      strncpy(lastMACs[MACindex],currentMAC,10);
+      strncpy(lastMACs[MACindex],currentMAC,12);
       Serial.print("NEW MAC WITH GOOD SIGNAL DETECTED: ");
       Serial.println(currentMAC);
       MACindex++;
@@ -78,7 +78,7 @@ void promisc_cb(uint8_t *buf, uint16_t len)
     if (MACindex == MAXlist) {
       Serial.println("BUFFER FULL: READY TO START SENDING MACs INFORMATION TO MQTT SERVER");
       for (int i=0;i<MAXlist;i++) {
-        for (int i2=0;i2<10;i2++) {
+        for (int i2=0;i2<12;i2++) {
           Serial.print(lastMACs[i][i2]);
         }
         Serial.println();
@@ -90,7 +90,7 @@ void promisc_cb(uint8_t *buf, uint16_t len)
    
     // Enable this lines if you want to scan for a specific MAC address
     // Specify desired MAC address on line 10 of structures.h
-    /*
+    
     int same = 1;
     for(int i=0;i<6;i++)
     {
@@ -102,13 +102,14 @@ void promisc_cb(uint8_t *buf, uint16_t len)
     }
     if(same)
     {
-      Serial.println("MAC found!");
+      Serial.print("MAC found: ");
+      Serial.println(currentMAC);
     }
     //different device
     else
     {
-      Serial.println(currentMAC);
+      //Serial.println(currentMAC);
     }
-   */
+   
   }
 }
