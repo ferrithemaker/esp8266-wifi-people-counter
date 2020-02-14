@@ -19,45 +19,6 @@ char sendMAC[13];
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-void setup() {
-  Serial.begin(57600);
-  Serial.println(F("MAC Sniffer and MQTT client logger by FerriTheMaker https://github.com/ferrithemaker/esp8266-wifi-people-counter"));
-  Serial.println(F("Based on ESP8266 enhanced sniffer by Kosme https://github.com/kosme"));
-  for (int i=0;i<MAXlist;i++) {
-    for (int i2=0;i2<12;i2++) {
-      lastMACs[i][i2]=0x00; // clean the array (fill with 0's)
-    }
-  }
-  enablesniffer();
-  lastupload = millis();
-}
-
-void loop() {
-  Serial.print("TIME REMAINING TO START SENDING DATA TO MQTT SERVER: ");
-  Serial.println(300000 - (timer - lastupload));
-  timer = millis();
-  if (sniffing == false || timer - lastupload > 300000) { // set a time limit to send the data to MQTT server (5 min)
-    sendMQTTdata();
-    lastupload = millis(); 
-    sniffing = true;
-  }
-  if (sniffing == true) {
-    channel = 1;
-    wifi_set_channel(channel);
-    while (true) {
-      nothing_new++;                          // Array is not finite, check bounds and adjust if required
-      if (nothing_new > 100) {
-        nothing_new = 0;
-        channel++;
-        if (channel == 15) break;             // Only scan channels 1 to 14
-        wifi_set_channel(channel);
-      }
-      delay(1);  // critical processing timeslice for NONOS SDK! No delay(0) yield()
-    }
-  }
-}
-
-
 void enablesniffer() {
   wifi_set_opmode(STATION_MODE);            // Promiscuous works only with station mode
   wifi_set_channel(channel);
@@ -67,18 +28,18 @@ void enablesniffer() {
 }
 
 void sendMQTTdata() {
+  int i = 0;
   wifi_promiscuous_enable(disable);
   WiFi.begin(ssid, password);             // Connect to the network
   Serial.print("Connecting to ");
   Serial.print(ssid); 
   Serial.println(" ...");
-  int i = 0;
-  while (WiFi.status() != WL_CONNECTED || i == 10) { // Wait for the Wi-Fi to connect
+  while (WiFi.status() != WL_CONNECTED && i < 10) { // Wait for the Wi-Fi to connect
     delay(1000);
     Serial.print(++i); 
     Serial.print(' ');
   }
-  if (i != 10) { // connection OK
+  if (i < 10) { // connection OK
     Serial.println('\n');
     Serial.println("Connection established!");  
     Serial.print("IP address:\t");
@@ -123,9 +84,48 @@ void sendMQTTdata() {
     // reenable sniffing
     enablesniffer();
   } else {
+    Serial.println('\n');
     Serial.println("WiFi Connection failed");
     MACindex = 0;
     // reenable sniffing
     enablesniffer();
+  }
+}
+
+void setup() {
+  Serial.begin(57600);
+  Serial.println(F("MAC Sniffer and MQTT client logger by FerriTheMaker https://github.com/ferrithemaker/esp8266-wifi-people-counter"));
+  Serial.println(F("Based on ESP8266 enhanced sniffer by Kosme https://github.com/kosme"));
+  for (int i=0;i<MAXlist;i++) {
+    for (int i2=0;i2<12;i2++) {
+      lastMACs[i][i2]=0x00; // clean the array (fill with 0's)
+    }
+  }
+  enablesniffer();
+  lastupload = millis();
+}
+
+void loop() {
+  Serial.print("TIME REMAINING TO START SENDING DATA TO MQTT SERVER: ");
+  Serial.println(300000 - (timer - lastupload));
+  timer = millis();
+  if (sniffing == false || timer - lastupload > 300000) { // set a time limit to send the data to MQTT server (5 min)
+    sendMQTTdata();
+    lastupload = millis(); 
+    sniffing = true;
+  }
+  if (sniffing == true) {
+    channel = 1;
+    wifi_set_channel(channel);
+    while (true) {
+      nothing_new++;                          // Array is not finite, check bounds and adjust if required
+      if (nothing_new > 100) {
+        nothing_new = 0;
+        channel++;
+        if (channel == 15) break;             // Only scan channels 1 to 14
+        wifi_set_channel(channel);
+      }
+      delay(1);  // critical processing timeslice for NONOS SDK! No delay(0) yield()
+    }
   }
 }

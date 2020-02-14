@@ -21,7 +21,7 @@ int foundMAC;
 
 void promisc_cb(uint8_t *buf, uint16_t len)
 {
-  signed potencia;
+  signed int potencia;
   if (len == 12) {
     struct RxControl *sniffer = (struct RxControl*) buf;
     potencia = sniffer->rssi;
@@ -69,10 +69,14 @@ void promisc_cb(uint8_t *buf, uint16_t len)
           break;  
       }
     }
-    if (!foundMAC && int8_t(buf[0])>SIGNAL_THRESHOLD) {
+    if (!foundMAC && int8_t(potencia)>SIGNAL_THRESHOLD) {
       strncpy(lastMACs[MACindex],currentMAC,12);
       Serial.print("NEW MAC WITH GOOD SIGNAL DETECTED: ");
-      Serial.println(currentMAC);
+      Serial.print(currentMAC);
+      Serial.print(" SIGNAL:");
+      //Serial.print(int8_t(buf[0]));
+      //Serial.print(" ");
+      Serial.println(potencia);
       MACindex++;
     }
     if (MACindex == MAXlist) {
