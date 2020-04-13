@@ -11,3 +11,8 @@ Python script to get the information from a MQTT broker and store it to influxdb
 
 **Important note:** the MQTT broker and influxdb server can be local or remote (it's up to you)
 
+options:
+
+debug # enables information output
+log # enables creation of data csv file
+mac_randomizer_mode # enables mac randomizer mode detection to (try to) avoid privacy settings of some WiFi devices 

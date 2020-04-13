@@ -8,11 +8,13 @@ import snifferconfig as cfg
 def on_message(client,userdata,message):
 	mac = str(message.payload.decode("utf-8"))
 	if mac != "":
-		last15mResults = influxclient.query('SELECT activity FROM traffic_accounting WHERE mac = \''+mac+'\' and time > now() - 15m;')
-		#print('SELECT total FROM traffic_accounting WHERE mac = \''+mac+'\' and time > now() - 1h;')
+		if mac_randomizer_mode:
+			mac_half=mac[0:6]
+			last15mResults = influxclient.query('SELECT activity FROM traffic_accounting WHERE mac =~ /^'+mac_half+'/ and time > now() - 15m;')
+		else:
+			last15mResults = influxclient.query('SELECT activity FROM traffic_accounting WHERE mac = \''+mac+'\' and time > now() - 15m;')
 		last15mPoints = last15mResults.get_points()
 		last15mPoints = list(last15mPoints)
-		#print(len(points))
 		twoHoursResults = influxclient.query('SELECT activity FROM traffic_accounting WHERE mac = \''+mac+'\' and time > now() - 2h;')
 		twoHoursPoints = twoHoursResults.get_points()
 		twoHoursPoints = list(twoHoursPoints)
@@ -42,6 +44,7 @@ def on_message(client,userdata,message):
 
 debug = True
 log = True
+mac_randomizer_mode = False # to avoid WiFi mac randomizer mode
 
 if log:
 	logfile = open("log.csv", "a")
