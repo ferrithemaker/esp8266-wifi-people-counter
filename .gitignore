@@ -5,3 +5,4 @@
 */.vscode/ipch
 credentials.h
 snifferconfig.py
+__pycache__
