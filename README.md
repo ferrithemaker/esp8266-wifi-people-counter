@@ -13,7 +13,7 @@ Python script to get the information from a MQTT broker and store it to influxdb
 
 **Important note:** you need to rename the snifferconfig_template.py file to snifferconfig.py and add the requiered data
 
-options:
+Options:
 
 **debug**  (True / False) enables information output
 
