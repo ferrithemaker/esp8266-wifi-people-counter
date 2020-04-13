@@ -1,6 +1,6 @@
 #define ETH_MAC_LEN 6
 
-#define SIGNAL_THRESHOLD -75
+#define SIGNAL_THRESHOLD -70 //db between -70 & -60 good signal, less is worse
 
 uint8_t broadcast1[3] = { 0x01, 0x00, 0x5e };
 uint8_t broadcast2[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
@@ -11,7 +11,7 @@ uint8_t desired[6] = { 0x48, 0x2c, 0xa0, 0x69, 0x30, 0x6f };
 
 bool sniffing = true;
 
-const int MAXlist = 5;
+const int MAXlist = 20;
 
 char lastMACs[MAXlist][12];
 

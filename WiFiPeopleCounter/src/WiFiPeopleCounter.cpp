@@ -16,6 +16,10 @@ unsigned long timer;
 
 char sendMAC[13];
 
+int debug_mode = 0;
+
+int time_limit = 300000; // time limit to wait until send information to MQTT server in msec (300000 = 5min)
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -106,10 +110,12 @@ void setup() {
 }
 
 void loop() {
-  Serial.print("TIME REMAINING TO START SENDING DATA TO MQTT SERVER: ");
-  Serial.println(300000 - (timer - lastupload));
+  if (debug_mode == 1) {
+    Serial.print("TIME REMAINING TO START SENDING DATA TO MQTT SERVER: ");
+    Serial.println(time_limit - (timer - lastupload));
+  }
   timer = millis();
-  if (sniffing == false || timer - lastupload > 300000) { // set a time limit to send the data to MQTT server (5 min)
+  if (sniffing == false || timer - lastupload > time_limit) { // set a time limit to send the data to MQTT server (5 min)
     sendMQTTdata();
     lastupload = millis(); 
     sniffing = true;
