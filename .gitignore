@@ -4,3 +4,4 @@
 */.vscode/launch.json
 */.vscode/ipch
 credentials.h
+snifferconfig.py
